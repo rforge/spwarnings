@@ -113,6 +113,7 @@ neighborsij <- function(x, state = levels(x$cells)[1], i = NULL, j = NULL, selec
 }
 
 
+
 # helper functions
 # ----------------
 
