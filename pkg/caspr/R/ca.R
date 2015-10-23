@@ -24,7 +24,11 @@
 #'   than \code{steadyparms$accept}.
 #' @param steadyparms a list of parameters that are required by the function
 #'   provided in \code{steady}.
-#' @param seed An integer number serving as seed for random number generation. 
+#' @param seed An integer number serving as seed for random number generation.
+#' @param plotting A binary variable. If TRUE, simulation is plotted into an animated gif.
+#' @param filename A character string. Filename of animated gif (defaults to "modelrun.gif") which will be placed in current working directory.
+#' 
+#'   
 #'   If not provided global seeds of R apply.
 #' @param ... Parameters handed over to update function in \code{model$update}.
 #'   
@@ -82,6 +86,8 @@ ca <- function(x, model = grazing, parms = "default",
                   stopifsteady = FALSE, 
                   steady = caspr::steady, 
                   steadyparms = list(t_eval = 200, accept = 0.001),
+                  plotting = FALSE,
+                  filename = "modelrun",
                   seed = NULL, ... )  {
   
   # checking fo valid input
@@ -185,6 +191,8 @@ ca <- function(x, model = grazing, parms = "default",
   #result$steady_state$issteady <- steadiness <= steady
   #result$steady_state$steadiness <- steadiness 
   class(result) <- "ca_result"
+  
+  if(plotting) ca_animate(result, filename = filename)
   return(result)
 }
 
@@ -268,14 +276,19 @@ plot.ca_result <- function(x, plotstates = c(TRUE, rep(FALSE, length(x$model$sta
 #'
 #' @param x 
 #'
-#' @return Returns a list \code{out} containing the model name, the final time, the mean cover  and standard deviation after transitory dynamics. 
-#'    
+#' @return Returns a list \code{out} containing the model name, the final time,
+#'   the mean cover  and standard deviation in the last 10 timesteps.
+#'   
+#' @note The mean and sd are supposed to depend on the model being in steady
+#'   state dynamics, i.e. beyond transitory. Lacking a universal criterion for
+#'   that, we report the final 10 timesteps.
+#'   
 #' @export
 
 summary.ca_result <- function(x) {
   out <- list()
   class(out) <- "ca_summary"
-  eval <- seq_along(x$time)
+  eval <- tail(seq_along(x$time),10)
   out$name <- x$model$name
   out$time <- c(min(x$time), max(x$time))
   out$mean_cover <- colMeans(x$cover[eval,])
@@ -312,7 +325,3 @@ as.array.ca_result <- function(x) {
   snaps <- length(x$landscapes)
   array(unlist(lapply(x$landscapes, as.matrix)), dim = c(width, height, snaps), dimnames = c("width", "height", "snaps"))
 }
-
-
-
-
