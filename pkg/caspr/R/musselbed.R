@@ -67,19 +67,20 @@ musselbed$ref <- "Guichard, F., Halpin, P.M., Allison, G.W., Lubchenco, J. & Men
 musselbed$states <- c("+", "0", "-")
 musselbed$cols <- grayscale(3)
 musselbed$parms <- list(
-  r = 0.8, # recolonisation of empty sites dependent on local density
-  d = 0.1, # probability of disturbance of occupied sites if at least one disturbed site
-  delta = 0.02 # intrinsic disturbance rate
-) 
-musselbed$update <- function(x_old, parms_temp, subs = 10) {
+  r = 0.4, # recolonisation of empty sites dependent on local density
+  d = 0.9, # probability of disturbance of occupied sites if at least one disturbed site
+  delta = 0.01 # intrinsic disturbance rate
+)
+musselbed$interact<-matrix(c(1,1,1,1,NA,1,1,1,1), ncol = 3, byrow = 3)
+musselbed$update <- function(x_old, parms_temp, delta = 0.2, subs = 10, timestep = NA) {
   
   x_new <- x_old
-
+  
   for(s in 1:subs) {
     
     parms_temp$rho_plus <- sum(x_old$cells == "+")/(x_old$dim[1]*x_old$dim[2]) # get initial vegetation cover
     parms_temp$localdisturbance <- neighbors(x_old, "-") > 0  # any disturbance in neighborhood?
-    parms_temp$localcover <- neighbors(x_old, "+")/4 # any occupied in neighborhood? 
+    parms_temp$localcover <- neighbors(x_old, "+")/8 # any occupied in neighborhood? 
     
     # 2 - drawing random numbers
     rnum <- runif(x_old$dim[1]*x_old$dim[2]) # one random number between 0 and 1 for each cell
@@ -89,7 +90,7 @@ musselbed$update <- function(x_old, parms_temp, subs = 10) {
     if(parms_temp$rho_plus > 0) {
       recolonisation <- with(parms_temp, (r*localcover)*1/subs)
       
-      disturbance <- with(parms_temp, (delta + d*localdisturbance) * 1/subs)
+      disturbance <- with(parms_temp, (delta+d*localdisturbance)*1/subs)
       disturbance[disturbance > 1] <- 1 
     } else {
       recolonisation <- 0
@@ -115,7 +116,7 @@ musselbed$update <- function(x_old, parms_temp, subs = 10) {
     x_old <- x_new
     
   }
-
+  
   ## end of single update call
   return(x_new)
 }
