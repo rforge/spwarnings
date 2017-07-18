@@ -5,21 +5,13 @@
 
 context('Test workflows') 
 
+data(forestdat)
+data(serengeti)
+
+datasets <- list(forestdat[1:3], serengeti[5:6])
 
 test_that("The Generic-spews workflow works", { 
   
-    
-    data(forestdat)
-    data(arid)
-    
-    fast <- TRUE
-    if (fast) { 
-      datasets <- list(forestdat[['matrices']], arid, 
-                      forestdat[['matrices']][[1]], arid[[1]])
-    } else { 
-      datasets <- list(forestdat[['matrices']], arid[[1]])
-    }
-    
     for ( dataset in datasets ) { 
       
     expect_true({
@@ -33,7 +25,7 @@ test_that("The Generic-spews workflow works", {
         as.data.frame(gensp) 
         
         
-        gensp.test <- indictest(gensp)
+        gensp.test <- indictest(gensp, null_replicates = 29)
         
         print.generic_spews_test(gensp.test)        
         summary.generic_spews_test(gensp.test)      
@@ -57,13 +49,6 @@ test_that("The Generic-spews workflow works", {
 
 test_that("The Spectral-spews workflow works", { 
   
-    
-    data(forestdat)
-    data(arid)
-    
-    datasets <- list(forestdat[['matrices']], arid, 
-                     forestdat[['matrices']][[1]], arid[[1]])
-    
     for ( dataset in datasets ) { 
       
     expect_true({
@@ -82,9 +67,9 @@ test_that("The Spectral-spews workflow works", {
         }
         
         
-        specsp.test <- indictest(specsp)
+        specsp.test <- indictest(specsp, null_replicates = 29)
         
-        print.spectral_spews_test(specsp.test)        
+        print.spectral_spews_test(specsp.test)
         
         # Missing functions !
         # summary.spectral_spews_test(specsp.test)      
@@ -97,6 +82,39 @@ test_that("The Spectral-spews workflow works", {
         
       })
     
+    # Return true 
+    TRUE})
+    
+  }
+  
+})
+
+
+test_that("The PSD-spews workflow works", { 
+  
+    for ( dataset in datasets ) { 
+    
+    expect_true({
+      
+      capture.output({
+        
+        specsp <- suppressWarnings( patchdistr_spews(dataset, fit_lnorm = TRUE) )
+        specsp <- suppressWarnings( patchdistr_spews(dataset) )
+        
+        print.patchdistr_spews(specsp)        
+        
+        summary.patchdistr_spews(specsp)      
+        if ( is.matrix(dataset) ) { 
+          as.data.frame.patchdistr_spews_single(specsp) 
+        } else { 
+          as.data.frame.patchdistr_spews_list(specsp) 
+        }
+        
+        # This produces warnings because of some NAs
+        suppressWarnings( print( plot.patchdistr_spews(specsp) ) )
+        
+      })
+      
     # Return true 
     TRUE})
     

@@ -4,7 +4,7 @@
 #   the case when subsize = 0 that crashes R otherwise. 
 # 
 
-#@export
+#'@export
 coarse_grain <- function(mat, subsize) { 
   
   if ( subsize < 1 ) { 
@@ -13,7 +13,7 @@ coarse_grain <- function(mat, subsize) {
     return(mat)
   }
   
-  .coarse_grain_unsafe(mat, subsize)
+  coarse_grain_cpp(mat, subsize)
   
 }
   

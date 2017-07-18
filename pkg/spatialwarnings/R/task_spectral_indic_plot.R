@@ -1,6 +1,4 @@
 # 
-#' @title Spectral spatial early-warning signals: SDR plotting function
-#' 
 #' @rdname spectral_spews
 #' 
 #' @param obj An \code{spectral_spews_test} object as produced by \link{indictest}
@@ -17,10 +15,13 @@
 #'   the null distribution. Note that it can not be displayed when the trend 
 #'   line reflects something else than the indicator values (when \code{what} 
 #'   is not set to "value").
-#'
+#' 
+#' @param ... Ignored 
+#' 
 #' @method plot spectral_spews_test
 #' @export
-plot.spectral_spews_test <- function(obj, # an indictest object
+plot.spectral_spews_test <- function(x, # an indictest object
+                                     ..., 
                                      along = NULL, 
                                      what = 'value', 
                                      display_null = TRUE) { 
@@ -28,23 +29,23 @@ plot.spectral_spews_test <- function(obj, # an indictest object
   # If along is not provided, then use the replicate number
   set_default_xlab <- FALSE 
   if ( is.null(along) ) { 
-    along <- unique(obj[ ,"replicate"])
+    along <- unique(x[ ,"replicate"])
     set_default_xlab <- TRUE 
   }
   
-  check_suitable_for_plots(obj, along, display_null)
+  check_suitable_for_plots(x, along, display_null)
   
   # This function only plots summary sdr so we subset the indictest data.frame
-  is_sdr <- obj[ ,'type'] == 'sdr'
-  plot_data <- data.frame(obj[is_sdr, ],
-                          gradient = along[obj[is_sdr,'replicate']])
+  is_sdr <- x[ ,'type'] == 'sdr'
+  plot_data <- data.frame(x[is_sdr, ],
+                          gradient = along[x[is_sdr,'replicate']])
   
   # Create base plot object 
   plot <- ggplot(plot_data) + theme_spwarnings()
   
   # Check if we really want to add a null ribbon
   add_null <- display_null
-  if ( display_null && ! "null_mean" %in% colnames(obj) ) { 
+  if ( display_null && ! "null_mean" %in% colnames(x) ) { 
     warning('Null data was specified to be displayed but could not be found ', 
             'in the provided object')
     add_null <- FALSE
@@ -58,8 +59,8 @@ plot.spectral_spews_test <- function(obj, # an indictest object
   
   if ( add_null ) { 
     null_data <- data.frame(plot_data,
-                            null_ymin = obj[is_sdr,'null_05'],
-                            null_ymax = obj[is_sdr,'null_95'])
+                            null_ymin = x[is_sdr,'null_05'],
+                            null_ymax = x[is_sdr,'null_95'])
     
     plot <- plot + 
       geom_ribbon(aes_string(x = 'gradient',
@@ -91,12 +92,13 @@ plot.spectral_spews_test <- function(obj, # an indictest object
 
 #' @export
 #' @method plot spectral_spews_list
-plot.spectral_spews_list <- function(obj, along = NULL) { 
-  plot.spectral_spews_test(as.data.frame(obj), 
+plot.spectral_spews_list <- function(x, ..., along = NULL) { 
+  plot.spectral_spews_test(as.data.frame(x), 
                            along = along,
                            display_null = FALSE, 
                            what = 'value')
 }
+
 
 
 

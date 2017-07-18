@@ -3,8 +3,6 @@
 # This file contains the indictest functions for spectral spews
 # 
 
-#' @title Spectral Spatial Early-Warnings
-#' 
 #' @rdname spectral_spews
 #' 
 #' @param null_replicates The number of replicates to use to compute use in the 
@@ -24,8 +22,8 @@ indictest.spectral_spews <- function(obj, null_replicates = 999, ...) {
 indictest.spectral_spews_list <- function(obj, null_replicates = 999, ...) { 
   
   # Compute a distribution of null values for SDR
-  results <- plyr::llply(obj, indictest.spectral_spews_single, 
-                             null_replicates, ...)
+  results <- parallel::mclapply(obj, indictest.spectral_spews_single, 
+                                null_replicates, ...)
   
   # Add a replicate column with replicate number
   results <- Map(function(obj, df) { df[ ,'replicate'] <- obj; df }, 

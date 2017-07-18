@@ -79,13 +79,13 @@
 #' @examples
 #' 
 #' data(forestdat)
-#' gen_indic <- generic_spews(forestdat[['matrices']], subsize = 2)
+#' gen_indic <- generic_spews(forestdat, subsize = 2)
 #' 
 #' # Display results
 #' summary(gen_indic)
 #' 
 #' # Display trends along the varying model parameter
-#' plot(gen_indic, along = forestdat[['parameters']][ ,'delta'])
+#' plot(gen_indic, along = forestdat.pars[ ,'d'])
 #' 
 #' # Compute significance
 #' gen_test <- indictest(gen_indic)
@@ -94,12 +94,12 @@
 #' 
 #' # Display the trend, now with a grey ribbon indicating the 5%-95% quantile
 #' # range of the null distribution
-#' plot(gen_test, along = forestdat[['parameters']][ ,'delta'])
+#' plot(gen_test, along = forestdat.pars[ ,'d'])
 #' 
 #' # Note that plot() method returns a ggplot object that can be modified
 #' # for convenience
 #' if ( require(ggplot2) ) { 
-#'   plot(gen_test, along = forestdat[['parameters']][ ,'delta']) + 
+#'   plot(gen_test, along = forestdat.pars[ ,'d']) + 
 #'     xlab('Delta') + 
 #'     theme_minimal()
 #' }
@@ -128,6 +128,13 @@ generic_spews <- function(mat,
   indicf <- function(mat) { 
     
     mat_cg <- coarse_grain(mat, subsize)
+    
+    if ( sd(as.vector(mat_cg)) == 0 ) { 
+      return( c(variance = var(as.vector(mat_cg)), 
+                skewness = NA_real_, 
+                moran    = NA_real_, 
+                mean     = mean(mat)) )
+    }
     
     # Handle detrending
     if (detrend) { 
