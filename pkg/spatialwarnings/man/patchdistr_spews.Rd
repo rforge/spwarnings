@@ -12,7 +12,7 @@ patchdistr_spews(x, merge = FALSE, fit_lnorm = FALSE, best_by = "BIC",
 
 \method{plot}{patchdistr_spews}(x, along = NULL, ...)
 
-\method{plot_distr}{patchdistr_spews}(x, best_only = TRUE, plrange = TRUE)
+plot_distr(x, best_only = TRUE, plrange = TRUE)
 }
 \arguments{
 \item{x}{A logical matrix (TRUE/FALSE values) or a list of these}
@@ -27,17 +27,24 @@ consider lognormal type ? (see details)}
 \item{best_by}{The criterion to use to select the best fit (one of "AIC", 
 "BIC" or "AICc")}
 
+\item{xmin}{The xmin to be used to fit the patch size distributions. Use 
+the special values "estimate" to use an estimated xmin for each fit}
+
 \item{xmin_bounds}{Bounds when estimating the xmin for power-law distributions}
 
-\item{wrap}{Whether patches are considered to wraparound when reaching one 
-side of the matrix.}
+\item{wrap}{Determines whether patches are considered to wraparound when 
+reaching one side of the matrix.}
 
 \item{along}{A vector providing values over which the indicator trend 
 will be plotted. If \code{NULL} then the values are plotted sequentially 
 in their original order.}
 
+\item{...}{Further arguments passed to methods}
+
 \item{best_only}{Plot the empirical (inverse cumulative) patch-size 
 distribution with an overlay of the estimated fits.}
+
+\item{plrange}{Plot the power-law range}
 }
 \value{
 A list object of class 'psdfit' containing among other things 
@@ -47,11 +54,15 @@ A list object of class 'psdfit' containing among other things
   - the percolation values (if several matrices were provided and 
   `merge` was TRUE, then the average percolation value is returned)
 }
+\description{
+Compute early-warnings based on patch size distributions 
+  and review/plot the results
+}
 \details{
 Patterned ecosystems can exhibit a change in their spatial structure as they 
 become more and more stressed. It has been suggested that this should be 
 reflected in changes in the observed patch size distributions (PSD). 
-The following sequence is expected to occur (Kéfi et al. 2011) as patterned 
+The following sequence is expected to occur (Kefi et al. 2011) as patterned 
 ecosystems become more and more degraded:
 
   - Percolation of vegetation patches occurs (a patch has a width or height 
@@ -79,7 +90,7 @@ using maximum-likelihood, with a minimum patch size (xmin) fixed to one.
 The best distribution is selected based on BIC by default. 
 
 To compute the Power-law range (PLR), power-laws are fitted with a variable 
-minimum patch size (xmin) and the one with the lowest Kolmogorov–Smirnov
+minimum patch size (xmin) and the one with the lowest Kolmogorov-Smirnov
 statistic is retained. PLR is then computed using this best-fitting xmin: 
 
 \deqn{\frac{log(x_{max}) - log(x_{min})}{log(x_{max}) - log(x_{smallest})}}{ (log(xmax) - log(xmin))/(log(xmax) - log(xsmallest))}
@@ -90,13 +101,9 @@ Results can be displayed using the text-based \code{summary} and \code{print},
 }
 \examples{
 
-data(arid)
-# Arid is a list of continous-data matrices: we need to threshold them to define 
-# what is a patch and what is not. 
-arid_threshold <- lapply(arid, function(e) e > quantile(e, .5))
+data(forestgap)
 
-# Compute patch
-psd_indic <- patchdistr_spews(arid_threshold)
+psd_indic <- patchdistr_spews(forestgap)
 
 summary(psd_indic)
 
@@ -108,14 +115,16 @@ Kefi, S., Rietkerk, M., Alados, C. L., Pueyo, Y., Papanastasis,
   and imminent desertification in Mediterranean arid ecosystems. 
   Nature, 449(7159), 213-217.
 
-Kéfi, S., Rietkerk, M., Roy, M., Franc, A., de Ruiter, P.C. & Pascual, M. 
+Kefi, S., Rietkerk, M., Roy, M., Franc, A., de Ruiter, P.C. & Pascual, M. 
   (2011). Robust scaling in ecosystems and the meltdown of patch size 
   distributions before extinction: Patch size distributions towards 
-  extinction. Ecology Letters, 14, 29–35.
+  extinction. Ecology Letters, 14, 29-35.
 
 Clauset, A., Shalizi, C. R., & Newman, M. E. (2009). 
   Power-law distributions in empirical data. SIAM review, 51(4), 661-703.
 }
 \seealso{
+\code{\link{indicator_psdtype}}
+
 \code{\link{patchsizes}}, \code{\link{label}}
 }

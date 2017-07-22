@@ -15,12 +15,9 @@
 #' 
 #' @rdname generic_spews
 #'
-#' @param obj A \code{generic_spews} object (as provided by the 
-#'   \code{generic_spews} function). 
 #' 
-#' @param along A vector providing values over which the indicator trend 
-#'   will be plotted. If \code{NULL} then the values are plotted sequentially 
-#'   in their original order. 
+# /!\ along is already documented elswhere !
+# /!\ x is already documented elswhere !
 #' 
 #' @param what The trendline to be displayed. Defaults to the indicator's 
 #'   values ("value") but other metrics can be displayed. Correct values are 
@@ -93,11 +90,9 @@ plot.generic_spews_test <- function(x,
   # Add the trend on the graph (Note that we add it over the null trend)
   plot <- plot + 
     ggplot2::geom_point(ggplot2::aes_string(x = 'gradient', 
-                                            y = what,
-                                            color = 'indicator')) + 
+                                            y = what)) + 
     ggplot2::geom_line(ggplot2::aes_string(x = 'gradient', 
                                            y = what,
-                                           color = 'indicator', 
                                            group = 'indicator'))
   
   # Add facets 
@@ -145,13 +140,20 @@ print.generic_spews_test <- function(x, ...) {
   x2 <- data.frame(x2, stars = pval_stars(x2[ ,'pval']))
   x2 <- dlply(x2, ~ indicator, subset, select = c('value', 'pval', 'stars'))
   
+  # Format pvalues
+  nreps <- attr(x, "nreplicates")
+  x2 <- lapply(x2, function(o) { 
+      o[ ,"pval"] <- format_pvalues(o[ ,'pval'], nreps)
+      return(o)
+    })
+  
   # We just keep the value for the mean (pval makes no sense)
   x2[['mean']] <- x2[['mean']][ ,c('value')]
   
   # Format final table
   x2 <- data.frame(replicate = unique(x[ ,'replicate']), 
                    do.call(data.frame, x2))
-                     
+  
   names(x2) <- c('Mat. #', 'Mean', 
                  'Moran\'s I', 'P>null', '   ',
                  'Skewness', 'P>null', '   ',

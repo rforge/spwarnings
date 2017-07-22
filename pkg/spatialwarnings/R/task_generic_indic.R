@@ -60,7 +60,7 @@
 #'
 #' @references 
 #' 
-#'   Kéfi, S., Guttal, V., Brock, W.A., Carpenter, S.R., Ellison, A.M., 
+#'   Kefi, S., Guttal, V., Brock, W.A., Carpenter, S.R., Ellison, A.M., 
 #'   Livina, V.N., et al. (2014). Early Warning Signals of Ecological 
 #'   Transitions: Methods for Spatial Patterns. PLoS ONE, 9, e92097.
 #'   
@@ -70,7 +70,7 @@
 #'   
 #'   Guttal, V., & Jayaprakash, C. (2008). Spatial variance and spatial 
 #'   skewness: leading indicators of regime shifts in spatial ecological 
-#'   systems. Theoretical Ecology, 2(1), 3–12. 
+#'   systems. Theoretical Ecology, 2(1), 3-12. 
 #'   
 #' @seealso 
 #'   \code{\link{indicator_moran}}, \code{\link{indicator_variance}} and 
@@ -78,14 +78,14 @@
 #'
 #' @examples
 #' 
-#' data(forestdat)
-#' gen_indic <- generic_spews(forestdat, subsize = 2)
+#' data(serengeti)
+#' gen_indic <- generic_spews(serengeti, subsize = 2)
 #' 
 #' # Display results
 #' summary(gen_indic)
 #' 
 #' # Display trends along the varying model parameter
-#' plot(gen_indic, along = forestdat.pars[ ,'d'])
+#' plot(gen_indic, along = serengeti.rain)
 #' 
 #' # Compute significance
 #' gen_test <- indictest(gen_indic)
@@ -94,13 +94,13 @@
 #' 
 #' # Display the trend, now with a grey ribbon indicating the 5%-95% quantile
 #' # range of the null distribution
-#' plot(gen_test, along = forestdat.pars[ ,'d'])
+#' plot(gen_test, along = serengeti.rain)
 #' 
 #' # Note that plot() method returns a ggplot object that can be modified
 #' # for convenience
 #' if ( require(ggplot2) ) { 
-#'   plot(gen_test, along = forestdat.pars[ ,'d']) + 
-#'     xlab('Delta') + 
+#'   plot(gen_test, along = serengeti.rain) + 
+#'     xlab('Annual rainfall') + 
 #'     theme_minimal()
 #' }
 #' 
@@ -119,8 +119,14 @@ generic_spews <- function(mat,
     results <- lapply(mat, generic_spews, subsize, detrend, abs_skewness,
                       moranI_coarse_grain)
     class(results) <- c('generic_spews_list', 'generic_spews', 
-                        'spews_result', 'list')
+                        'spews_result_list', 'list')
     return(results)
+  }
+  
+  # Warn if the matrix is continous but we will coarse grain anyway
+  if ( is.numeric(mat) && subsize > 1 ) { 
+    warning(paste('Input matrix has continous values but will be coarse-grained', 
+                  'anyway. Set subsize=1 to disable coarse graining.'))
   }
   
   # Build the right indicator function (closure) that take into accounts the 
@@ -169,7 +175,7 @@ generic_spews <- function(mat,
                   detrend = detrend)
   
   class(results) <- c('generic_spews_single', 'generic_spews',
-                      'spews_result', 'list')
+                      'spews_result_single', 'list')
   return(results)
 }
 

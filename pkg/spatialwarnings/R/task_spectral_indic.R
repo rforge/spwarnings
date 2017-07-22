@@ -37,11 +37,9 @@
 #' The \code{plot} methods returns a ggplot object (usually displayed 
 #' immediately when called interactively). 
 #' 
-#' @details
-#'   
-#' Spectral early warning signals are based on the fact that some dynamical 
-#'   systems can exhibit an change in some characteristics of their spatial 
-#'   structure when approaching a transition. In particular, long-range 
+#' @details Spectral early warning signals are based on the fact that some 
+#'   dynamical systems can exhibit an change in some characteristics of their 
+#'   spatial structure when approaching a transition. In particular, long-range 
 #'   correlations are expected to have an increased importance. 
 #' 
 #' This is expected to be reflected in the spectrum of the spatial structure
@@ -73,32 +71,44 @@
 #' 
 #' @references 
 #' 
-#'   Kéfi, S., Guttal, V., Brock, W.A., Carpenter, S.R., Ellison, A.M., 
+#'   Kefi, S., Guttal, V., Brock, W.A., Carpenter, S.R., Ellison, A.M., 
 #'   Livina, V.N., et al. (2014). Early Warning Signals of Ecological 
 #'   Transitions: Methods for Spatial Patterns. PLoS ONE, 9, e92097.
 #' 
 #' @examples
 #' 
-#' data(forestdat) 
+#' data(serengeti) 
+#' data(serengeti.rain) 
 #' 
-#' spec_indic <- spectral_spews(forestdat[['matrices']], 
+#' 
+#' spec_indic <- spectral_spews(serengeti, 
 #'                              sdr_low_range  = c(0, .2), 
 #'                              sdr_high_range = c(.8, 1))
 #' 
 #' summary(spec_indic)
 #' 
 #' # Display trends along the varying model parameter
-#' plot(spec_indic, along = forestdat[['parameters']][ ,'delta'])
+#' plot(spec_indic, along = serengeti.rain)
+#' 
+#' # Computing spectra many times is expensive, consider setting parallel 
+#' # computing using: options(mc.cores = n)
 #' 
 #' # Assess significance
-#' spec_test <- indictest(spec_indic)
+#' spec_test <- indictest(spec_indic, nperm = 499)
 #' summary(spec_test)
 #' 
-#' # Display trends, now with a grey 5%-95% quantiles of the null distribution
-#' plot(spec_test, along = forestdat[['parameters']][ ,'delta'])
+#' # Display the SDR trend, now with a grey ribbon representing 5%-95% 
+#' # quantiles of the null distribution
+#' plot(spec_test, along = serengeti.rain)
 #' 
 #' # Display radial-spectra
-#' plot_spectrum(spec_test, along = forestdat[['parameters']][ ,'delta'])
+#' plot_spectrum(spec_test, along = serengeti.rain)
+#' 
+#' # Graphics can be modified using ggplot2 functions
+#' if (require(ggplot2)) { 
+#'   plot_spectrum(spec_test, along = serengeti.rain) + 
+#'     scale_y_log10()
+#' }
 #' 
 #' @export
 spectral_spews <- function(mat, 
@@ -112,7 +122,7 @@ spectral_spews <- function(mat,
   if ( is.null(sdr_low_range) ) { 
     if ( !quiet ) { 
       warning("Choosing the 20% lowest frequencies for spectral density ratio ",
-              "as none was specified. Use parameter sdr_low_range to choose ", 
+              "as no range was specified. Use parameter sdr_low_range to choose ", 
               "a different value.")
     }
     sdr_low_range <- c(0, .2)
@@ -121,7 +131,7 @@ spectral_spews <- function(mat,
   if ( is.null(sdr_high_range) ) { 
     if ( !quiet ) { 
       warning("Choosing the 20% highest frequencies for spectral density ratio ",
-              "as none was specified. Use parameter sdr_high_range to choose ", 
+              "as no range was specified. Use parameter sdr_high_range to choose ", 
               "a different value.")
     }
     sdr_high_range <- c(.8, 1)
@@ -131,7 +141,7 @@ spectral_spews <- function(mat,
   if ( is.list(mat) ) { 
     results <- lapply(mat, spectral_spews, sdr_low_range, sdr_high_range, quiet)
     class(results) <- c('spectral_spews_list',  'spectral_spews', 
-                        'spews_result', 'list')
+                        'spews_result_list', 'list')
     return(results)
   }
   
@@ -167,6 +177,6 @@ spectral_spews <- function(mat,
                  low_range = ranges_absolute[['low']], 
                  high_range = ranges_absolute[['high']])
   class(output) <- c('spectral_spews_single', 'spectral_spews', 
-                     'spews_result', 'list')
+                     'spews_result_single', 'list')
   return(output)
 }

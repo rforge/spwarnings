@@ -5,7 +5,7 @@
 
 
 # Note: we reuse the print method for spectral spews that works well
-#' @method print spectral_spews_test
+#'@method print spectral_spews_test
 #'@export 
 print.spectral_spews_test <- function(x, ...) { 
   print.spectral_spews(x, ...)
@@ -22,11 +22,15 @@ summary.spectral_spews_test <- function(object, ...) {
   cat('Spectral Spatial Early-Warnings results\n') 
   cat('\n')
   
-  # Show only SDR and print as data frame
+  # Keep only SDR and print as data frame
   x2 <- as.data.frame(object)
   x2 <- x2[x2[ ,"type"] == 'sdr', c('replicate', 'value', 'pval')]
+  
+  # Format pvals
   x2<- data.frame(x2, stars = pval_stars(x2[ ,'pval']))
-  names(x2) <- c('Replicate #', 'SDR Value', 'P>null', '   ')
+  x2[ ,"pval"] <- format_pvalues(x2[ ,"pval"], attr(object, "nreplicates"))
+  
+  names(x2) <- c('Matrix #', 'SDR Value', 'P>null', '   ')
   print.data.frame(x2, row.names = FALSE)
   
   cat('\n')

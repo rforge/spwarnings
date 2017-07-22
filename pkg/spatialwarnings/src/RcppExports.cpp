@@ -83,15 +83,14 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rspectrum_cpp
-DataFrame rspectrum_cpp(arma::mat amat, int nthreads);
-RcppExport SEXP spatialwarnings_rspectrum_cpp(SEXP amatSEXP, SEXP nthreadsSEXP) {
+// rspectrum
+DataFrame rspectrum(arma::mat mat);
+RcppExport SEXP spatialwarnings_rspectrum(SEXP matSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type amat(amatSEXP);
-    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(rspectrum_cpp(amat, nthreads));
+    Rcpp::traits::input_parameter< arma::mat >::type mat(matSEXP);
+    rcpp_result_gen = Rcpp::wrap(rspectrum(mat));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -139,7 +138,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"spatialwarnings_raw_moran", (DL_FUNC) &spatialwarnings_raw_moran, 1},
     {"spatialwarnings_tplsum", (DL_FUNC) &spatialwarnings_tplsum, 4},
     {"spatialwarnings_shuffle_and_compute", (DL_FUNC) &spatialwarnings_shuffle_and_compute, 4},
-    {"spatialwarnings_rspectrum_cpp", (DL_FUNC) &spatialwarnings_rspectrum_cpp, 2},
+    {"spatialwarnings_rspectrum", (DL_FUNC) &spatialwarnings_rspectrum, 1},
     {"spatialwarnings_raw_skewness", (DL_FUNC) &spatialwarnings_raw_skewness, 1},
     {"spatialwarnings_sum_all_one_over_k", (DL_FUNC) &spatialwarnings_sum_all_one_over_k, 3},
     {"spatialwarnings_sum_all_one_over_k_before", (DL_FUNC) &spatialwarnings_sum_all_one_over_k_before, 2},

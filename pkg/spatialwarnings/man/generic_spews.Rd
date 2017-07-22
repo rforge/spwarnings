@@ -12,7 +12,7 @@
 generic_spews(mat, subsize = 4, detrend = FALSE, abs_skewness = FALSE,
   moranI_coarse_grain = FALSE)
 
-\method{indictest}{generic_spews}(obj, null_replicates = 999, ...)
+\method{indictest}{generic_spews}(x, nperm = 999, ...)
 
 \method{plot}{generic_spews_test}(x, along = NULL, what = "value",
   display_null = TRUE, ...)
@@ -34,10 +34,10 @@ raw values ?}
 \item{moranI_coarse_grain}{Should the input matrix be coarse-grained before
 computing the Moran's I indicator value ?}
 
-\item{obj}{A \code{generic_spews} object (as provided by the 
+\item{x}{A \code{generic_spews} object (as provided by the 
 \code{generic_spews} function).}
 
-\item{null_replicates}{The number of replicates to use to compute a null 
+\item{nperm}{The number of replicates to use to compute a null 
 distribution}
 
 \item{...}{Additional arguments passed onto methods}
@@ -92,17 +92,20 @@ The significance of generic early-warning signals can be estimated by
   are then recomputed on the shuffled matrices and the values obtained are 
   used as a null distribution. P-values are obtained based on the rank of 
   the observered value in the null distribution.
+
+Note that the produced plot is adjusted depending on whether 
+  \code{along} is numeric or not.
 }
 \examples{
 
-data(forestdat)
-gen_indic <- generic_spews(forestdat, subsize = 2)
+data(serengeti)
+gen_indic <- generic_spews(serengeti, subsize = 2)
 
 # Display results
 summary(gen_indic)
 
 # Display trends along the varying model parameter
-plot(gen_indic, along = forestdat.pars[ ,'d'])
+plot(gen_indic, along = serengeti.rain)
 
 # Compute significance
 gen_test <- indictest(gen_indic)
@@ -111,19 +114,19 @@ print(gen_test)
 
 # Display the trend, now with a grey ribbon indicating the 5\%-95\% quantile
 # range of the null distribution
-plot(gen_test, along = forestdat.pars[ ,'d'])
+plot(gen_test, along = serengeti.rain)
 
 # Note that plot() method returns a ggplot object that can be modified
 # for convenience
 if ( require(ggplot2) ) { 
-  plot(gen_test, along = forestdat.pars[ ,'d']) + 
-    xlab('Delta') + 
+  plot(gen_test, along = serengeti.rain) + 
+    xlab('Annual rainfall') + 
     theme_minimal()
 }
 
 }
 \references{
-Kéfi, S., Guttal, V., Brock, W.A., Carpenter, S.R., Ellison, A.M., 
+Kefi, S., Guttal, V., Brock, W.A., Carpenter, S.R., Ellison, A.M., 
   Livina, V.N., et al. (2014). Early Warning Signals of Ecological 
   Transitions: Methods for Spatial Patterns. PLoS ONE, 9, e92097.
   
@@ -133,7 +136,7 @@ Kéfi, S., Guttal, V., Brock, W.A., Carpenter, S.R., Ellison, A.M.,
   
   Guttal, V., & Jayaprakash, C. (2008). Spatial variance and spatial 
   skewness: leading indicators of regime shifts in spatial ecological 
-  systems. Theoretical Ecology, 2(1), 3–12.
+  systems. Theoretical Ecology, 2(1), 3-12.
 }
 \seealso{
 \code{\link{indicator_moran}}, \code{\link{indicator_variance}} and 

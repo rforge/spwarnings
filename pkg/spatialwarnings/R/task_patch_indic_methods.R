@@ -14,7 +14,10 @@
 #'   will be plotted. If \code{NULL} then the values are plotted sequentially 
 #'   in their original order. 
 #' 
+#' @param ... Further arguments passed to methods
+#' 
 #'@method plot patchdistr_spews
+#'@export
 plot.patchdistr_spews <- function(x, along = NULL, ...) { 
   if ( 'patchdistr_spews_single' %in% class(x) ) { 
     stop('I cannot plot a trend with only one value')
@@ -93,8 +96,6 @@ plot.patchdistr_spews_list <- function(x, along = NULL) {
     ylab('') + 
     xlab(xtitle)
   
-  browser()
-  
   if ( ! is.numeric(along) ) { 
     # Note that it is quite tricky to make ggplot produce a line over factors: 
     # `group=1` seems to do the trick. 
@@ -137,16 +138,11 @@ plot.patchdistr_spews_list <- function(x, along = NULL) {
 #' @param best_only Plot the empirical (inverse cumulative) patch-size 
 #' distribution with an overlay of the estimated fits. 
 #' 
-#' @method plot_distr patchdistr_spews
-#' 
-#' @export
+#' @param plrange Plot the power-law range 
+#'
+#'@export
 plot_distr <- function(x, best_only = TRUE, plrange = TRUE) { 
   UseMethod('plot_distr')
-}
-
-#'@export 
-plot_distr.patchdistr_spews <- function(x, best_only = TRUE, plrange = TRUE) { 
-  NextMethod('plot_distr')
 }
 
 #'@export

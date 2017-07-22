@@ -1,6 +1,9 @@
 #
 #' @title Early-warning signals based on patch size distributions
-#'
+#' 
+#' @description Compute early-warnings based on patch size distributions 
+#'   and review/plot the results
+#' 
 #' @param x A logical matrix (TRUE/FALSE values) or a list of these
 #' 
 #' @param merge The default behavior is to produce indicators values for each 
@@ -13,10 +16,13 @@
 #' @param best_by The criterion to use to select the best fit (one of "AIC", 
 #'   "BIC" or "AICc")
 #' 
+#' @param xmin The xmin to be used to fit the patch size distributions. Use 
+#'   the special values "estimate" to use an estimated xmin for each fit
+#' 
 #' @param xmin_bounds Bounds when estimating the xmin for power-law distributions
 #'
-#' @param wrap Whether patches are considered to wraparound when reaching one 
-#'   side of the matrix.  
+#' @param wrap Determines whether patches are considered to wraparound when 
+#' reaching one side of the matrix.  
 #' 
 #' @return A list object of class 'psdfit' containing among other things 
 #'   - the observed patch size distribution data
@@ -25,12 +31,14 @@
 #'   - the percolation values (if several matrices were provided and 
 #'   `merge` was TRUE, then the average percolation value is returned)
 #' 
+#' @seealso \code{\link{indicator_psdtype}}
+#' 
 #' @details 
 #' 
 #' Patterned ecosystems can exhibit a change in their spatial structure as they 
 #' become more and more stressed. It has been suggested that this should be 
 #' reflected in changes in the observed patch size distributions (PSD). 
-#' The following sequence is expected to occur (Kéfi et al. 2011) as patterned 
+#' The following sequence is expected to occur (Kefi et al. 2011) as patterned 
 #' ecosystems become more and more degraded:
 #' 
 #'   - Percolation of vegetation patches occurs (a patch has a width or height 
@@ -58,7 +66,7 @@
 #' The best distribution is selected based on BIC by default. 
 #' 
 #' To compute the Power-law range (PLR), power-laws are fitted with a variable 
-#' minimum patch size (xmin) and the one with the lowest Kolmogorov–Smirnov
+#' minimum patch size (xmin) and the one with the lowest Kolmogorov-Smirnov
 #' statistic is retained. PLR is then computed using this best-fitting xmin: 
 #' 
 #' \deqn{\frac{log(x_{max}) - log(x_{min})}{log(x_{max}) - log(x_{smallest})}}{ (log(xmax) - log(xmin))/(log(xmax) - log(xsmallest))}
@@ -76,23 +84,19 @@
 #'   and imminent desertification in Mediterranean arid ecosystems. 
 #'   Nature, 449(7159), 213-217.
 #' 
-#' Kéfi, S., Rietkerk, M., Roy, M., Franc, A., de Ruiter, P.C. & Pascual, M. 
+#' Kefi, S., Rietkerk, M., Roy, M., Franc, A., de Ruiter, P.C. & Pascual, M. 
 #'   (2011). Robust scaling in ecosystems and the meltdown of patch size 
 #'   distributions before extinction: Patch size distributions towards 
-#'   extinction. Ecology Letters, 14, 29–35.
+#'   extinction. Ecology Letters, 14, 29-35.
 #' 
 #' Clauset, A., Shalizi, C. R., & Newman, M. E. (2009). 
 #'   Power-law distributions in empirical data. SIAM review, 51(4), 661-703.
 #' 
 #' @examples
 #' 
-#' data(arid)
-#' # Arid is a list of continous-data matrices: we need to threshold them to define 
-#' # what is a patch and what is not. 
-#' arid_threshold <- lapply(arid, function(e) e > quantile(e, .5))
+#' data(forestgap)
 #' 
-#' # Compute patch
-#' psd_indic <- patchdistr_spews(arid_threshold)
+#' psd_indic <- patchdistr_spews(forestgap)
 #' 
 #' summary(psd_indic)
 #' 
@@ -114,7 +118,7 @@ patchdistr_spews <- function(x,
     results <- parallel::mclapply(x, patchdistr_spews, merge, fit_lnorm, 
                                   best_by, xmin, xmin_bounds, wrap)
     class(results) <- c('patchdistr_spews_list', 'patchdistr_spews', 
-                        'spews_result', 'list')
+                        'spews_result_list', 'list')
     return(results)
   } 
   
@@ -154,7 +158,7 @@ patchdistr_spews <- function(x,
                  npatches = length(psd),
                  unique_patches = length(unique(psd)))
   class(result) <- c('patchdistr_spews_single', 'patchdistr_spews', 
-                     'spews_result', 'list')
+                     'spews_result_single', 'list')
   
   return(result)
 }

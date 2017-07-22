@@ -18,6 +18,17 @@
 #  
 #' @rdname generic_spews
 #' 
+#' @param x A \code{generic_spews} object (as provided by the 
+#'   \code{generic_spews} function). 
+#' 
+#' @param along A vector providing values over which the indicator trend 
+#'   will be plotted. If \code{NULL} then the values are plotted sequentially 
+#'   in their original order. 
+#' 
+#' @details Note that the produced plot is adjusted depending on whether 
+#'   \code{along} is numeric or not. 
+#' 
+#' 
 #' @method plot generic_spews
 #' @export
 plot.generic_spews <- function(x, along = NULL, ...) { 
