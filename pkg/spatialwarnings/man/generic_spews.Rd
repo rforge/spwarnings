@@ -9,7 +9,7 @@
 \alias{plot.generic_spews}
 \title{Generic Spatial Early-Warning signals}
 \usage{
-generic_spews(mat, subsize = 4, detrend = FALSE, abs_skewness = FALSE,
+generic_spews(mat, subsize = 4, abs_skewness = FALSE,
   moranI_coarse_grain = FALSE)
 
 \method{indictest}{generic_spews}(x, nperm = 999, ...)
@@ -24,9 +24,6 @@ generic_spews(mat, subsize = 4, detrend = FALSE, abs_skewness = FALSE,
 or a list of those}
 
 \item{subsize}{The subsize used for the coarse-graining phase (see Details)}
-
-\item{detrend}{Should the values be detrended by removing the spatial mean
-of the matrix ?}
 
 \item{abs_skewness}{Should the absolute skewness be used instead of its 
 raw values ?}
@@ -81,17 +78,22 @@ The Generic Early warning signal are based on the property of a
 
 Before computing the actual indicators, the matrix can be "coarse-grained". 
   This process reduces the matrix by averaging the nearby cells using 
-  a square window defined by the \code{subsize} parameter. This helps 
-  removing artefactual trends in variance and skewness due to binary (1/0) 
-  data but is completely optional when using continous data. Keep in mind 
-  that it effectively reduces the size of the matrix by approximately 
-  \code{subsize} on each dimension.
+  a square window defined by the \code{subsize} parameter. This makes spatial  
+  variance and skewness reflect actual spatial patterns when working with 
+  binary (\code{TRUE}/\code{FALSE} data), but is optional when using 
+  continous data. Keep in mind that it effectively reduces the size of 
+  the matrix by approximately \code{subsize} on each dimension. 
   
 The significance of generic early-warning signals can be estimated by 
   reshuffling the original matrix (function \code{indictest}). Indicators 
   are then recomputed on the shuffled matrices and the values obtained are 
   used as a null distribution. P-values are obtained based on the rank of 
-  the observered value in the null distribution.
+  the observered value in the null distribution. A small P-value means 
+  that the indicator is significantly above the null values, as expected 
+  before a critical point. 
+
+The \code{plot} method can displays the results graphically. A text summary 
+  can be obtained using the \code{summary} method.
 
 Note that the produced plot is adjusted depending on whether 
   \code{along} is numeric or not.
@@ -99,7 +101,8 @@ Note that the produced plot is adjusted depending on whether
 \examples{
 
 data(serengeti)
-gen_indic <- generic_spews(serengeti, subsize = 2)
+gen_indic <- generic_spews(serengeti, subsize = 5, 
+                           moranI_coarse_grain = TRUE)
 
 # Display results
 summary(gen_indic)
@@ -116,10 +119,14 @@ print(gen_test)
 # range of the null distribution
 plot(gen_test, along = serengeti.rain)
 
+# Display the effect size compared to null distribution 
+plot(gen_test, along = serengeti.rain, what = "z_score")
+
 # Note that plot() method returns a ggplot object that can be modified
 # for convenience
 if ( require(ggplot2) ) { 
   plot(gen_test, along = serengeti.rain) + 
+    geom_vline(xintercept = 593, color = "red", linetype = "dashed") +
     xlab('Annual rainfall') + 
     theme_minimal()
 }

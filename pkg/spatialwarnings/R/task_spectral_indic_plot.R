@@ -75,7 +75,9 @@ plot.spectral_spews_test <- function(x, # an indictest object
   }
   
   # Add the trend on the graph (Note that we add it over the null trend)
-  plot <- plot + geom_line(aes_string(x = 'gradient', y = what))
+  plot <- plot + 
+    geom_point(aes_string(x = 'gradient', y = what)) + 
+    geom_line(aes_string(x = 'gradient', y = what))
   
   # Add ylabs
   plot <- plot + ylab('Spectral density ratio')
@@ -123,6 +125,10 @@ plot_spectrum.spectral_spews_test <- function(x,
                                               display_null = TRUE) { 
   
   # If along is not provided, then use the replicate number
+  if ( !is.null(along) && (length(along) != max(x[ ,'replicate'])) ) { 
+    stop('The along values are unfit for plotting (size mismatch)')
+  }
+  
   set_default_xlab <- FALSE 
   if ( is.null(along) ) { 
     along <- unique(x[ ,"replicate"])

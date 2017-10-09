@@ -21,8 +21,8 @@
 #' 
 #' @param xmin_bounds Bounds when estimating the xmin for power-law distributions
 #'
-#' @param wrap Determines whether patches are considered to wraparound when 
-#' reaching one side of the matrix.  
+#' @param wrap Determines whether patches are considered to wrap around the 
+#'  matrix when reaching the side 
 #' 
 #' @return A list object of class 'psdfit' containing among other things 
 #'   - the observed patch size distribution data
@@ -30,8 +30,6 @@
 #'   - the power-law range values 
 #'   - the percolation values (if several matrices were provided and 
 #'   `merge` was TRUE, then the average percolation value is returned)
-#' 
-#' @seealso \code{\link{indicator_psdtype}}
 #' 
 #' @details 
 #' 
@@ -67,15 +65,22 @@
 #' 
 #' To compute the Power-law range (PLR), power-laws are fitted with a variable 
 #' minimum patch size (xmin) and the one with the lowest Kolmogorov-Smirnov
-#' statistic is retained. PLR is then computed using this best-fitting xmin: 
+#' distance to the empirical distribution is retained. PLR is then computed 
+#' using this best-fitting xmin: 
 #' 
 #' \deqn{\frac{log(x_{max}) - log(x_{min})}{log(x_{max}) - log(x_{smallest})}}{ (log(xmax) - log(xmin))/(log(xmax) - log(xsmallest))}
 #' 
 #' Results can be displayed using the text-based \code{summary} and \code{print}, 
 #'   but graphical options are also available to plot the trends (\code{plot}) and 
-#'   the fitted distributions (\code{plot_distr}). 
+#'   the fitted distributions (\code{plot_distr}). Plotting functions are 
+#'   documented in a \link[=patchdistr_spews_plot]{separate page}. Observed and 
+#'   fitted distributions can be produced using the \code{predict} function, 
+#'   as documented in \link[=patchdistr_spews_predict]{this page}. 
 #' 
-#' @seealso \code{\link{patchsizes}}, \code{\link{label}}
+#' @seealso \code{\link{indicator_psdtype}}, \code{\link{patchsizes}}, 
+#'   \code{\link[=patchdistr_spews_plot]{plot}}, 
+#'   \code{\link[=patchdistr_spews_plot]{plot_distr}}, 
+#'   \code{\link[=patchdistr_spews_predict]{predict}}
 #' 
 #' @references 
 #' 
@@ -99,9 +104,13 @@
 #' psd_indic <- patchdistr_spews(forestgap)
 #' 
 #' summary(psd_indic)
+#' plot(psd_indic)
 #' 
-#' plot(psd_indic) 
-# 
+#' # Plots can be modified using ggplot2 directives 
+#' if ( require(ggplot2) ) { 
+#'   plot(psd_indic) + 
+#'     theme_minimal()
+#' }
 #' @export
 patchdistr_spews <- function(x, 
                              merge = FALSE,

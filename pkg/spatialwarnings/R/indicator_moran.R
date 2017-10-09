@@ -4,18 +4,20 @@
 #'   (with lag one). It also computes a null value obtained by randomizing 
 #'   the matrix.
 #'
-#' @references Dakos, V., van Nes, E. H., Donangelo, R., Fort, H., & 
+#' @references 
+#'
+#' Dakos, V., van Nes, E. H., Donangelo, R., Fort, H., & 
 #' Scheffer, M. (2010). Spatial correlation as leading indicator of 
 #' catastrophic shifts. Theoretical Ecology, 3(3), 163-174.
-#' 
+#'
+#' Legendre, P., & Legendre, L. F. J. (2012). Numerical Ecology.
+#' Elsevier Science.
+#'
 #' @param input An matrix or a list of matrix object. It should 
 #'   be a square matrix 
 #' 
 #' @param subsize logical. Dimension of the submatrix used to coarse-grain the 
 #'   original matrix (set to 1 for no coarse-graining).
-#' 
-#' @param detrending If TRUE data are detrended by removing the spatial mean. 
-#'   (Default is FALSE)
 #' 
 #' @param nreplicates Number of replicates to produce to estimate null 
 #'   distribution of index (default: 999).
@@ -23,8 +25,7 @@
 #' @return A list (or a list of those if input is a list of matrix 
 #'   object) of:
 #'     \itemize{
-#'       \item `mean`: Landscape mean cover
-#'       \item `corr`: Spatial autocorrelation of the matrix
+#'       \item `value`: Spatial autocorrelation of the matrix
 #'     }
 #'   If nreplicates is above 2, then the list has the following additional 
 #'   components : 
@@ -42,10 +43,9 @@
 #' indicator_moran(serengeti)
 #'
 #' 
-#'@export  
+#'@export
 indicator_moran <- function(input, 
                             subsize     = 1, # default = no cg
-                            detrending  = FALSE, 
                             nreplicates = 999) {
   
   check_mat(input) # checks if binary and sensible
@@ -53,8 +53,7 @@ indicator_moran <- function(input,
   
   if (is.list(input)) {
     # Returns a list of lists
-    return( lapply(input, indicator_moran, 
-                   subsize, detrending, nreplicates) )
+    return( lapply(input, indicator_moran, subsize, nreplicates) )
   } else { 
     
     # We alter the moran function to do coarse_graining if the user asked for it
@@ -65,8 +64,7 @@ indicator_moran <- function(input,
       indicf <- raw_moran
     }
     
-    return( compute_indicator_with_null(input, detrending, 
-                                        nreplicates, indicf) ) 
+    return( compute_indicator_with_null(input, nreplicates, indicf) )
     
     
   }

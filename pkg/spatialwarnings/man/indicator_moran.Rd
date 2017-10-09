@@ -4,7 +4,7 @@
 \alias{indicator_moran}
 \title{Moran's Index at lag of 1}
 \usage{
-indicator_moran(input, subsize = 1, detrending = FALSE, nreplicates = 999)
+indicator_moran(input, subsize = 1, nreplicates = 999)
 }
 \arguments{
 \item{input}{An matrix or a list of matrix object. It should 
@@ -13,9 +13,6 @@ be a square matrix}
 \item{subsize}{logical. Dimension of the submatrix used to coarse-grain the 
 original matrix (set to 1 for no coarse-graining).}
 
-\item{detrending}{If TRUE data are detrended by removing the spatial mean. 
-(Default is FALSE)}
-
 \item{nreplicates}{Number of replicates to produce to estimate null 
 distribution of index (default: 999).}
 }
@@ -23,8 +20,7 @@ distribution of index (default: 999).}
 A list (or a list of those if input is a list of matrix 
   object) of:
     \itemize{
-      \item `mean`: Landscape mean cover
-      \item `corr`: Spatial autocorrelation of the matrix
+      \item `value`: Spatial autocorrelation of the matrix
     }
   If nreplicates is above 2, then the list has the following additional 
   components : 
@@ -52,4 +48,7 @@ indicator_moran(serengeti)
 Dakos, V., van Nes, E. H., Donangelo, R., Fort, H., & 
 Scheffer, M. (2010). Spatial correlation as leading indicator of 
 catastrophic shifts. Theoretical Ecology, 3(3), 163-174.
+
+Legendre, P., & Legendre, L. F. J. (2012). Numerical Ecology.
+Elsevier Science.
 }

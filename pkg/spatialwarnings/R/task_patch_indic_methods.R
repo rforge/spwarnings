@@ -8,13 +8,56 @@
 # Plot methods
 # --------------------------------------------------
 # 
-#' @rdname patchdistr_spews
+#' @rdname patchdistr_spews_plot
+#' @name patchdistr_spews_plot
+#' 
+#' @title Early-warning signals based on patch size distributions
+#' 
+#' @description Plot early-warning signals based on patch size distributions 
+#' 
+#' @param x An object as produced by \code{\link{spectral_spews}}
 #' 
 #' @param along A vector providing values over which the indicator trend 
 #'   will be plotted. If \code{NULL} then the values are plotted sequentially 
 #'   in their original order. 
 #' 
 #' @param ... Further arguments passed to methods
+#' 
+#' @details 
+#'   
+#'   The \code{plot} function will produce a complex figure summarizing the change 
+#'   in patch size distributions along a set of values. The figure has two 
+#'   panels: 
+#'   \itemize{ 
+#'      \item the upper panel shows the percolation status of empty 
+#'        (\code{FALSE}) and occupied cells (\code{TRUE}), and shows the mean 
+#'        value (proportion of \code{TRUE} values). The background shows 
+#'        the proportion of each type of distribution for each unique values 
+#'        of the \code{along} vector. 
+#'        
+#'      \item the bottom panel displays the power-law range
+#'   }
+#'  
+#'  The \code{plot_spectrum} function displays each distribution in an 
+#'    individual facet, with an overlay of the best distribution fit and a blue 
+#'    bar showing the power-law range. This mode of representation can be 
+#'    cumbersome when working with a high number of matrices but displays the 
+#'    full shape of the distributions. 
+#'  
+#' @seealso \code{\link{patchdistr_spews}}
+#' 
+#' @examples
+#' 
+#' data(forestgap)
+#' psd_indic <- patchdistr_spews(forestgap)
+#' 
+#' plot(psd_indic, along = forestgap.pars[ ,"d"]) 
+#' 
+#' # When along is non-numeric, bars are used for display
+#' plot(psd_indic, along = as.factor(forestgap.pars[ ,"d"]))
+#' 
+#' # Display individual distributions
+#' plot_distr(psd_indic, along = forestgap.pars[ ,"d"])
 #' 
 #'@method plot patchdistr_spews
 #'@export
@@ -33,7 +76,7 @@ plot.patchdistr_spews <- function(x, along = NULL, ...) {
 plot.patchdistr_spews_list <- function(x, along = NULL) { 
   
   if ( !is.null(along) && (length(along) != length(x)) ) { 
-    stop('The along values are unfit for plotting (size mismatch')
+    stop('The along values are unfit for plotting (size mismatch)')
   }
   
   obj_table <- as.data.frame(x)
@@ -47,26 +90,21 @@ plot.patchdistr_spews_list <- function(x, along = NULL) {
     along <- as.factor(obj_table[ ,'replicate'])
     xtitle <- "Matrix number"
   }
+  
   obj_table[ ,"along"] <- along
   
   # Now we summarise the obj_table
-  alltypes <- unique(na.omit(obj_table[ ,"type"]))
-  alltypes <- if (length(alltypes) == 0) NA else alltypes
+  alltypes <- na.omit(unique(obj_table[ ,"type"]))
   
   summ <- ddply(obj_table, 'along',
-                function(df) {
-                  type_freqs <- rep(0, length(alltypes))
-                  names(type_freqs) <- alltypes
-                  
-                  if ( ! all(is.na(df[ ,'type'])) ) { 
-                    counts <- c(table(df[ ,'type'])) 
-                    type_freqs[names(counts)] <- counts
-                    type_freqs <- type_freqs / sum(type_freqs)
-                  } else { 
-                    # We set type freq to 1 as it will determine the scaling
-                    type_freqs <- NA_real_
-                  }
-                  
+                function(df) { 
+                  type_freqs <- sapply(alltypes, 
+                         function(current_type) { 
+                           sum(!is.na(df[ ,'type']) & df[ 'type'] == current_type)
+                         })
+                  type_freqs <- type_freqs / ifelse(sum(type_freqs) > 0, 
+                                                    sum(type_freqs), 1)
+
                   data.frame(type = alltypes, type_freq = type_freqs, 
                              percolation = mean(df[ ,'percolation']), 
                              percolation_empty = mean(df[ ,'percolation_empty']), 
@@ -110,9 +148,7 @@ plot.patchdistr_spews_list <- function(x, along = NULL) {
                    fun.y = mean, geom = "line") + 
       stat_summary(aes_q(x = ~along, y = ~cover, 
                          linetype = "Mean cover", group = 1), 
-                   fun.y = mean, geom = "line") + 
-      geom_bar(aes_q(x = ~along, y = ~plrange, group = 1), 
-               stat = "identity")
+                   fun.y = mean, geom = "line") 
       
   } else { 
     plot <- plot + 
@@ -122,33 +158,51 @@ plot.patchdistr_spews_list <- function(x, along = NULL) {
       geom_line(aes_q(x = ~along, y = ~percolation_empty, linetype = "Perc. (empty)"), 
                 color = 'black') +
       geom_line(aes_q(x = ~along, y = ~cover, linetype = "Mean cover"), 
-                color = 'black') +
-      geom_area(aes_q(x = ~along, y = ~plrange, group = 1), 
-                stat = "identity") 
+                color = 'black') 
       
   }
+  
+  # Add plrange to the graph
+  plot <- plot + 
+      geom_point(aes_q(x = ~along, y = ~plrange, group = 1), 
+                stat = "identity") + 
+      geom_line(aes_q(x = ~along, y = ~plrange, group = 1), 
+                stat = "identity") 
   
   return(plot)
 }
 
 
-
-#' @rdname patchdistr_spews
+#' @rdname patchdistr_spews_plot
 #' 
-#' @param best_only Plot the empirical (inverse cumulative) patch-size 
-#' distribution with an overlay of the estimated fits. 
+# // along arg is already documented in plot() method
+#' 
+#' @param best_only Plot only the best fit the empirical (inverse cumulative) patch-size 
+#'   distribution with an overlay of the estimated fits. 
 #' 
 #' @param plrange Plot the power-law range 
 #'
 #'@export
-plot_distr <- function(x, best_only = TRUE, plrange = TRUE) { 
+plot_distr <- function(x, along = NULL, best_only = TRUE, plrange = TRUE) { 
   UseMethod('plot_distr')
 }
 
 #'@export
+plot_distr.patchdistr_spews <- function(x, along = NULL, best_only = TRUE, 
+                                        plrange = TRUE) { 
+  NextMethod('plot_distr')
+}
+
+#'@export
 plot_distr.patchdistr_spews_single <- function(x, 
+                                               along = NULL, 
                                                best_only = TRUE, 
                                                plrange = TRUE) { 
+  
+  if ( !is.null(along) ) { 
+    warning('Ignoring along parameter when plotting only one patch-size', 
+            'distribution')
+  }
   
   # Get plottable data.frames
   values <- predict(x, best_only = best_only)  
@@ -192,11 +246,21 @@ plot_distr.patchdistr_spews_single <- function(x,
 
 #'@export
 plot_distr.patchdistr_spews_list <- function(x, 
+                                             along = NULL, 
                                              best_only = TRUE, 
                                              plrange = TRUE) { 
   
+  if ( !is.null(along) && (length(along) != length(x)) ) { 
+    stop('The along values are unfit for plotting (size mismatch)')
+  }
+  
   # Get plottable data.frames
   values <- predict(x, best_only = best_only)
+  # Modify replicate column if necessary and reorder values
+  if ( ! is.null(along) ) { 
+    values[['obs']][ ,'replicate']  <- along[values[["obs"]][ ,'replicate']]
+    values[['pred']][ ,'replicate'] <- along[values[["pred"]][ ,'replicate']]
+  }
   
   plot <- ggplot() + 
     scale_y_log10() +
@@ -210,6 +274,10 @@ plot_distr.patchdistr_spews_list <- function(x,
     # Add plrange to the plot. We need to extract info 
     # from the observed psd so that we can place the segment on the plot. 
     plrange_dat <- unique( as.data.frame(x)[ ,c("replicate", 'xmin_est')] )
+    if ( ! is.null(along) ) { 
+      plrange_dat[ ,"replicate"] <- along[plrange_dat[ ,"replicate"]]
+    }
+    
     patches_minmax <- ddply(values[['obs']], "replicate", 
                           function(df) { 
                             data.frame(xmax = max(df[ ,"patchsize"]))
@@ -254,7 +322,42 @@ plot_distr.patchdistr_spews_list <- function(x,
 
 # Predict methods 
 # --------------------------------------------------
-
+#' @rdname patchdistr_spews_predict
+#' @name patchdistr_spews_predict
+#' 
+#' @title predict method for patchdistr_spews objects
+#' 
+#' @description Export the observed and fitted patch size distributions 
+#' 
+#' @param object An \code{\link{patchdistr_spews}} object 
+#' 
+#' @param newdata A vector of patch sizes at which the fit is returned (default 
+#'   to 200 regularly-spaced values). 
+#' 
+#' @param ... Ignored additionnal arguments
+#' 
+#' @param best_only Return values for only the best fit of each element (matrix)
+#'   in \code{object}, or return the values for all fitted distribution. 
+#' 
+#' @return A list with component obs, a data.frame containing the observed 
+#'   distribution values and pred, a data.frame containing the fitted 
+#'   values. 
+#' 
+#' @details The function \code{\link{patchdistr_spews}} fits competing 
+#'   distribution models to the observed patch size distributions. This 
+#'   functions is able to export the observed values and the fitted values 
+#'   altogether. 
+#' 
+#' @examples 
+#' 
+#' patch_indics <- patchdistr_spews(forestgap)
+#' 
+#' predict(patch_indics)
+#' 
+#' @seealso \code{\link{patchdistr_spews}}, 
+#'   \code{\link[=patchdistr_spews_plot]{plot}}, 
+#'   \code{\link[=patchdistr_spews_plot]{plot_distr}}, 
+#' 
 #'@export
 predict.patchdistr_spews_single <- function(object, ..., 
                                             newdata = NULL,
@@ -430,7 +533,7 @@ summary.patchdistr_spews <- function(object, ...) {
   
   cat('Patch-based Early-Warnings results\n') 
   cat('\n')
-  print.data.frame(dat, row.names = FALSE)
+  print.data.frame(dat, row.names = FALSE, digits = DIGITS)
   cat('\n')
   cat('Use as.data.frame() to retrieve values in a convenient form\n')
   invisible(dat)
@@ -454,3 +557,17 @@ print.patchdistr_spews <- function(x, ...) {
   cat('\n')
   cat('Use as.data.frame() to retrieve values in a convenient form\n')
 }
+
+
+
+# Helper function 
+# ---------------
+# Get the inverse cumulative distribution of a psd (P(x >= k))
+cumpsd <- function(dat) { 
+  x <- sort(unique(dat))
+  N <- length(dat)
+  y <- sapply(x, function(k) { sum(dat >= k) / N })
+  return( data.frame(patchsize = x, y = y) )
+}
+
+

@@ -13,8 +13,9 @@ indicator_psdtype(x, xmin = 1, merge = FALSE, fit_lnorm = FALSE,
 \item{xmin}{The xmin to be used to fit the patch size distributions. Use 
 the special values "estimate" to use an estimated xmin for each fit}
 
-\item{merge}{If input is a list, then merge all the observed patch-size
-distributions in a single one to obtain a better fit.}
+\item{merge}{The default behavior is to produce indicators values for each 
+matrix. If this parameter is set to TRUE then the patch size distributions 
+are pooled together for fitting.}
 
 \item{fit_lnorm}{Fit also a log-normal distribution}
 
@@ -24,8 +25,8 @@ the whole range of observed patch sizes)}
 \item{best_by}{The criterion used to select the best distribution type 
 (one of \code{"AIC"}, \code{"BIC"} or \code{"AICc"}).}
 
-\item{wrap}{Detemines whether patches are considered to wraparound when 
-reaching one side of the matrix.}
+\item{wrap}{Determines whether patches are considered to wrap around the 
+matrix when reaching the side}
 }
 \value{
 A data.frame (or a list of these if x is a list) with the 
@@ -52,6 +53,28 @@ This functions fits different patch size distributions
  the patches contained in a matrix. The distributions are returned with 
  their corresponding AIC, BIC and AICc to select the best fit.
 }
+\details{
+Patterned ecosystems can exhibit a change in their spatial structure as they 
+become more and more stressed. It has been suggested that this should be 
+reflected in changes in the observed patch size distributions (PSD). 
+The following sequence is expected to occur (Kefi et al. 2011) as patterned 
+ecosystems become more and more degraded:
+
+  - Percolation of vegetation patches occurs (a patch has a width or height 
+  equal to the size of the system)
+  
+  - The patch-size distribution follows a power-law
+  
+  - The patch-size distribution deviates from a power-law as larger patches 
+  break down
+  
+  - The patch-size distribution is closer to an exponential 
+  distribution
+
+This indicator fits the observed patch size distribution based on 
+maximum-likelihood (following Clauset et al. 2009 recommendations), then 
+select the best model using AIC, BIC (default) or AICc.
+}
 \examples{
 
 data(forestgap)
@@ -70,5 +93,11 @@ Kefi, S., Rietkerk, M., Alados, C.L., Pueyo, Y., Papanastasis, V.P., ElAich,
 A., et al. (2007). Spatial vegetation patterns and imminent desertification
 in Mediterranean arid ecosystems. Nature, 449, 213-217.
 
-Clauset et al. #TODO
+Clauset, A., Shalizi, C. R., & Newman, M. E. (2009). 
+  Power-law distributions in empirical data. SIAM review, 51(4), 661-703.
+}
+\seealso{
+\code{\link{patchdistr_spews}}
+
+\code{\link{patchdistr_spews}}
 }

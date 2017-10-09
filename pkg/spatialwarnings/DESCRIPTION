@@ -16,11 +16,11 @@ Imports:
     ggplot2 (>= 1.0.0),
     plyr,
     VGAM,
-    poweRlaw,
     reshape2,
     tidyr, 
     stats, 
     utils, 
+    poweRlaw, 
     parallel
 Suggests:
     testthat,

@@ -9,21 +9,63 @@
 #' 
 #' @param sdr_low_range The range of values (in proportion) to 
 #'   use for the computation of the spectral density ratio.
-#'   For example, for the lowest 20% (default value), set sdr_low_range to 
-#'   c(0, .2).
+#'   For example, for the lowest 20\% (default value), set \code{sdr_low_range}
+#'   to \code{c(0, .2)}.
 #'  
 #' @param sdr_high_range The range of values (in proportion) to 
 #'   use for the computation of the spectral density ratio. For example, for 
-#'   the higher 20% (default value), set sdr_high_range to 
-#'   c(.8, 1). 
+#'   the highest 20\% (default value), set \code{sdr_high_range} to 
+#'   \code{c(.8, 1)}. 
 #' 
 #' @param nreplicates The number of replicates to compute for the null 
 #'   distribution
 #' 
-#' @return A single value containing the SDR value 
+#' @return A list (or a list of lists if input was a list of matrices) with 
+#'   components:
+#'     \itemize{
+#'       \item `value`: SDR of the matrix
+#'     }
+#'   If nreplicates is above 2, then the list has the following additional 
+#'   components : 
+#'     \itemize{
+#'       \item `null_mean`: Mean SDR of the null distribution
+#'       \item `null_sd`: SD of SDR in the null distribution
+#'       \item `z_score`: Z-score of the observed value in the null distribution 
+#'                          (value minus the null mean and divided by null 
+#'                          standard deviation)
+#'       \item `pval`: p-value based on the rank of the observed SDR
+#'                       in the null distribution. A low p-value means that 
+#'                       the indicator value is significantly higher than the 
+#'                       null values. 
+#'     }
 #' 
-#' @references ? Biggs et al. 2008 ? (Vishu suggestion IIRC [Alex])
-#'
+#' @details 
+#' 
+#' SDR measures the increase in long-range correlations before a critical point. 
+#'   It is the ratio of the average low frequency value over high frequency 
+#'   values. In this implementation, an increase in SDR implies a "reddening" 
+#'   of the \link[=rspectrum]{r-spectrum}. See also \code{\link{spectral_spews}} for 
+#'   a more complete description. 
+#' 
+#' Low and high frequencies are averaged in order to compute the SDR. The 
+#'   parameters \code{sdr_low_range} and \code{sdr_high_range} control which 
+#'   frequencies are selected for averaging. For example 
+#'   \code{sdr_low_range = c(0, .2)} (default) uses the lower 20% to compute 
+#'   the average of low frequencies. \code{sdr_high_range = c(.8, 1)} uses the 
+#'   higher 20% for the average of high frequencies. 
+#' 
+#' @seealso spectral_spews, rspectrum
+#' 
+#' @references 
+#' 
+#' Carpenter, S.R. & Brock, W.A. (2010). Early warnings of regime shifts in 
+#'   spatial dynamics using the discrete Fourier transform. Ecosphere
+#' 
+#' @examples 
+#' 
+#' serengeti.sdr <- indicator_sdr(serengeti, nreplicates = 499)
+#' do.call(rbind, serengeti.sdr) # convert results to data.frame
+#' 
 #' @export
 indicator_sdr <- function(input, 
                           sdr_low_range  = NULL, 
@@ -65,7 +107,6 @@ indicator_sdr <- function(input,
   
   return( 
     compute_indicator_with_null(input, 
-                                detrending = FALSE, 
                                 nreplicates = nreplicates, 
                                 indicf = indicf)
   )

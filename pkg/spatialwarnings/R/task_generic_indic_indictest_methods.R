@@ -81,9 +81,11 @@ plot.generic_spews_test <- function(x,
                                                ymax = 'null_ymax'),
                            data = null_data, 
                            fill = 'grey',
+                           group = 1, 
                            alpha = .8) + 
       ggplot2::geom_line(ggplot2::aes_string(x = "gradient", 
                                              y = "null_mean"), 
+                         group = 1, 
                          color = 'black', alpha = .1)
   }
   
@@ -148,7 +150,7 @@ print.generic_spews_test <- function(x, ...) {
     })
   
   # We just keep the value for the mean (pval makes no sense)
-  x2[['mean']] <- x2[['mean']][ ,c('value')]
+  x2[['mean']] <- x2[['mean']][ ,'value']
   
   # Format final table
   x2 <- data.frame(replicate = unique(x[ ,'replicate']), 

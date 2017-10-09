@@ -101,6 +101,13 @@
 #' # quantiles of the null distribution
 #' plot(spec_test, along = serengeti.rain)
 #' 
+#' # Add a line highlighting the shift 
+#' if (require(ggplot2)) {
+#'   plot(spec_test, along = serengeti.rain) + 
+#'     geom_vline(xintercept = 590, color = "red", linetype = "dashed")
+#' }
+#' 
+#' 
 #' # Display radial-spectra
 #' plot_spectrum(spec_test, along = serengeti.rain)
 #' 
@@ -140,6 +147,7 @@ spectral_spews <- function(mat,
   # Handle list case
   if ( is.list(mat) ) { 
     results <- lapply(mat, spectral_spews, sdr_low_range, sdr_high_range, quiet)
+    names(results) <- names(mat)
     class(results) <- c('spectral_spews_list',  'spectral_spews', 
                         'spews_result_list', 'list')
     return(results)

@@ -13,9 +13,6 @@
 #' 
 #' @param subsize The subsize used for the coarse-graining phase (see Details)
 #'   
-#' @param detrend Should the values be detrended by removing the spatial mean
-#'   of the matrix ?
-#'   
 #' @param abs_skewness Should the absolute skewness be used instead of its 
 #'   raw values ? 
 #' 
@@ -46,18 +43,23 @@
 #' 
 #' Before computing the actual indicators, the matrix can be "coarse-grained". 
 #'   This process reduces the matrix by averaging the nearby cells using 
-#'   a square window defined by the \code{subsize} parameter. This helps 
-#'   removing artefactual trends in variance and skewness due to binary (1/0) 
-#'   data but is completely optional when using continous data. Keep in mind 
-#'   that it effectively reduces the size of the matrix by approximately 
-#'   \code{subsize} on each dimension.
+#'   a square window defined by the \code{subsize} parameter. This makes spatial  
+#'   variance and skewness reflect actual spatial patterns when working with 
+#'   binary (\code{TRUE}/\code{FALSE} data), but is optional when using 
+#'   continous data. Keep in mind that it effectively reduces the size of 
+#'   the matrix by approximately \code{subsize} on each dimension. 
 #'   
 #' The significance of generic early-warning signals can be estimated by 
 #'   reshuffling the original matrix (function \code{indictest}). Indicators 
 #'   are then recomputed on the shuffled matrices and the values obtained are 
 #'   used as a null distribution. P-values are obtained based on the rank of 
-#'   the observered value in the null distribution. 
+#'   the observered value in the null distribution. A small P-value means 
+#'   that the indicator is significantly above the null values, as expected 
+#'   before a critical point. 
 #'
+#' The \code{plot} method can displays the results graphically. A text summary 
+#'   can be obtained using the \code{summary} method. 
+#' 
 #' @references 
 #' 
 #'   Kefi, S., Guttal, V., Brock, W.A., Carpenter, S.R., Ellison, A.M., 
@@ -79,7 +81,8 @@
 #' @examples
 #' 
 #' data(serengeti)
-#' gen_indic <- generic_spews(serengeti, subsize = 2)
+#' gen_indic <- generic_spews(serengeti, subsize = 5, 
+#'                            moranI_coarse_grain = TRUE)
 #' 
 #' # Display results
 #' summary(gen_indic)
@@ -96,10 +99,14 @@
 #' # range of the null distribution
 #' plot(gen_test, along = serengeti.rain)
 #' 
+#' # Display the effect size compared to null distribution 
+#' plot(gen_test, along = serengeti.rain, what = "z_score")
+#' 
 #' # Note that plot() method returns a ggplot object that can be modified
 #' # for convenience
 #' if ( require(ggplot2) ) { 
 #'   plot(gen_test, along = serengeti.rain) + 
+#'     geom_vline(xintercept = 593, color = "red", linetype = "dashed") +
 #'     xlab('Annual rainfall') + 
 #'     theme_minimal()
 #' }
@@ -107,7 +114,6 @@
 #' @export
 generic_spews <- function(mat, 
                           subsize = 4,
-                          detrend = FALSE,
                           abs_skewness = FALSE,
                           moranI_coarse_grain = FALSE) {
   
@@ -116,8 +122,9 @@ generic_spews <- function(mat,
   orig_mat <- mat
   
   if ( is.list(mat) ) { 
-    results <- lapply(mat, generic_spews, subsize, detrend, abs_skewness,
+    results <- lapply(mat, generic_spews, subsize, abs_skewness,
                       moranI_coarse_grain)
+    names(results) <- names(mat) # import list names
     class(results) <- c('generic_spews_list', 'generic_spews', 
                         'spews_result_list', 'list')
     return(results)
@@ -127,6 +134,11 @@ generic_spews <- function(mat,
   if ( is.numeric(mat) && subsize > 1 ) { 
     warning(paste('Input matrix has continous values but will be coarse-grained', 
                   'anyway. Set subsize=1 to disable coarse graining.'))
+  }
+  
+  if ( is.logical(mat) && subsize == 1 ) { 
+    warning(paste('Input matrix is binary but no coarse-graining will be',
+                  'performed.'))
   }
   
   # Build the right indicator function (closure) that take into accounts the 
@@ -140,11 +152,6 @@ generic_spews <- function(mat,
                 skewness = NA_real_, 
                 moran    = NA_real_, 
                 mean     = mean(mat)) )
-    }
-    
-    # Handle detrending
-    if (detrend) { 
-      mat_cg <- mat_cg - mean(mat_cg)
     }
     
     if (moranI_coarse_grain) { 
@@ -171,8 +178,7 @@ generic_spews <- function(mat,
                   subsize = subsize, 
                   indicf  = indicf, 
                   abs_skewness = abs_skewness, 
-                  moranI_coarse_grain = moranI_coarse_grain,
-                  detrend = detrend)
+                  moranI_coarse_grain = moranI_coarse_grain)
   
   class(results) <- c('generic_spews_single', 'generic_spews',
                       'spews_result_single', 'list')

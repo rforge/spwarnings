@@ -1,0 +1,8 @@
+## Travis config file to build a package
+
+language: r
+cache: packages
+r:
+  - oldrel
+  - release
+  - devel
